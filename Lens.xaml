@@ -1,0 +1,124 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Jev Lens" Width="1180" Height="720" MinWidth="1040" MinHeight="620" WindowStartupLocation="CenterScreen"
+        Background="#10151B" Foreground="#F1F4EE" FontFamily="Segoe UI" FontSize="13">
+  <Window.Resources>
+    <Style TargetType="ScrollBar">
+      <Setter Property="Width" Value="8"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ScrollBar">
+        <Track x:Name="PART_Track" IsDirectionReversed="True">
+          <Track.Thumb><Thumb><Thumb.Template><ControlTemplate TargetType="Thumb"><Border Background="#43554D" CornerRadius="4" Margin="2,0"/></ControlTemplate></Thumb.Template></Thumb></Track.Thumb>
+        </Track>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <Style TargetType="TextBlock"><Setter Property="TextWrapping" Value="Wrap"/></Style>
+    <Style TargetType="Button">
+      <Setter Property="Background" Value="#202B34"/><Setter Property="Foreground" Value="#DCE5E8"/>
+      <Setter Property="Padding" Value="14,9"/><Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="BorderThickness" Value="0"/><Setter Property="Margin" Value="0,0,8,0"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+          <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Border>
+        <ControlTemplate.Triggers>
+          <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ButtonBorder" Property="Opacity" Value="0.8"/></Trigger>
+          <Trigger Property="IsEnabled" Value="False"><Setter TargetName="ButtonBorder" Property="Opacity" Value="0.35"/></Trigger>
+          <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#B7F36B"/><Setter TargetName="ButtonBorder" Property="BorderThickness" Value="1"/></Trigger>
+        </ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <DataTemplate x:Key="LocalRow">
+      <Border Padding="0,10" BorderBrush="#28323B" BorderThickness="0,0,0,1">
+        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="48"/></Grid.ColumnDefinitions>
+          <StackPanel><TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" Foreground="#C5CDD5"/>
+            <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="#778995" Margin="0,4,0,0"/></StackPanel>
+          <TextBlock Grid.Column="1" Text="{Binding LocalLabel}" Foreground="#8395A2" HorizontalAlignment="Right" FontFamily="Consolas"/>
+        </Grid>
+      </Border>
+    </DataTemplate>
+    <DataTemplate x:Key="RankedRow">
+      <Border Background="#1B252D" CornerRadius="8" Padding="13,10" Margin="0,0,0,7">
+        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="30"/><ColumnDefinition Width="*"/><ColumnDefinition Width="105"/></Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding Position}" Foreground="#8194A1" FontFamily="Consolas" VerticalAlignment="Center"/>
+          <StackPanel Grid.Column="1" Margin="0,0,14,0"><TextBlock Text="{Binding Title}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+            <TextBlock Text="{Binding Breakdown}" Foreground="#879CAA" FontSize="11" Margin="0,4,0,0"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" VerticalAlignment="Center"><TextBlock Text="{Binding ProbabilityLabel}" HorizontalAlignment="Right" Foreground="#B7F36B" FontFamily="Consolas" FontSize="16"/>
+            <ProgressBar Height="3" Value="{Binding ProbabilityValue}" Maximum="100" Background="#324136" Foreground="#B7F36B" BorderThickness="0" Margin="0,6,0,0"/>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </Window.Resources>
+  <Grid Margin="30,23,30,18">
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+    <Grid>
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Grid Width="32" Height="32" Margin="0,0,12,0"><Ellipse Stroke="#B7F36B" StrokeThickness="2"/><Ellipse Width="12" Height="12" Fill="#B7F36B"/></Grid>
+        <TextBlock Text="JEV LENS" FontWeight="SemiBold" FontSize="17" VerticalAlignment="Center"/>
+        <TextBlock Text="/  POWERSHELL LAB" Foreground="#778995" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="11"/>
+      </StackPanel>
+      <Border HorizontalAlignment="Right" Background="#203327" CornerRadius="12" Padding="12,6"><TextBlock x:Name="Mode" Text="LIVE JEV" Foreground="#B7F36B" FontSize="11" FontWeight="SemiBold"/></Border>
+    </Grid>
+    <Grid Grid.Row="1" Margin="0,23,0,19"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="330"/></Grid.ColumnDefinitions>
+      <StackPanel><TextBlock Text="Your files. A little understanding." FontSize="30" FontWeight="SemiBold"/>
+        <TextBlock Text="Describe what you need. Watch a typed decision change the order." Foreground="#8F9FAA" FontSize="14" Margin="0,8,0,0"/></StackPanel>
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right"><TextBlock x:Name="SourceLabel" Foreground="#C4CFD6" HorizontalAlignment="Right"/>
+        <TextBlock Text="Names + metadata only · file contents stay local" Foreground="#778995" FontSize="11" Margin="0,6,0,0"/>
+      </StackPanel>
+    </Grid>
+    <StackPanel Grid.Row="2" Margin="0,0,0,20">
+      <Border Background="#1C2731" BorderBrush="#486147" BorderThickness="1" CornerRadius="10" Padding="17,12">
+        <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="35"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+          <TextBlock Text="⌕" FontSize="26" Foreground="#B7F36B" VerticalAlignment="Center"/>
+          <TextBox x:Name="Query" Grid.Column="1" Background="Transparent" Foreground="#F1F4EE" BorderThickness="0" FontSize="21" CaretBrush="#B7F36B" VerticalContentAlignment="Center" MaxLength="180" AutomationProperties.Name="Describe the file you need"/>
+          <Button x:Name="Refresh" Grid.Column="2" Content="Refresh files" Margin="12,0,0,0" FontSize="11"/>
+        </Grid>
+      </Border>
+      <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+        <Button x:Name="Example1" Content="The latest proposal" FontSize="12"/>
+        <Button x:Name="Example2" Content="Artwork for the announcement" FontSize="12"/>
+        <Button x:Name="Example3" Content="Logs for troubleshooting" FontSize="12"/>
+        <Button x:Name="Example4" Content="What did we earn this month?" FontSize="12"/>
+        <Button x:Name="Example5" Content="A proposal" FontSize="12"/>
+      </StackPanel>
+    </StackPanel>
+    <Grid Grid.Row="3"><Grid.ColumnDefinitions><ColumnDefinition Width="310"/><ColumnDefinition Width="22"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+      <Border Background="#161E25" CornerRadius="12" Padding="20">
+        <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <TextBlock Text="01 / LOCAL CANDIDATES" FontSize="11" FontWeight="SemiBold" Foreground="#93A5B2"/>
+          <TextBlock Grid.Row="1" Text="Names + content + recency" FontSize="19" Margin="0,9,0,8"/>
+          <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><ItemsControl x:Name="LocalRows" ItemTemplate="{StaticResource LocalRow}"/></ScrollViewer>
+          <TextBlock Grid.Row="3" Text="PowerShell searches bounded text files locally. Raw contents stay on this machine." Foreground="#778995" FontSize="11" Margin="0,15,0,0"/>
+        </Grid>
+      </Border>
+      <Border Grid.Column="2" Background="#17221F" BorderBrush="#304337" BorderThickness="1" CornerRadius="12" Padding="20">
+        <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+          <Grid><TextBlock Text="02 / JEV JUDGES → POWERSHELL RANKS" FontSize="11" FontWeight="SemiBold" Foreground="#B7F36B"/>
+            <TextBlock x:Name="Working" Text="READY" HorizontalAlignment="Right" Foreground="#8FAD89" FontSize="10"/></Grid>
+          <Grid Grid.Row="1" Margin="0,13,0,14"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="160"/></Grid.ColumnDefinitions>
+            <StackPanel><TextBlock x:Name="TopTitle" Text="Start with a little intent." FontSize="23" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+              <TextBlock x:Name="Decision" Text="Three typed questions. One round trip." Foreground="#99B29D" Margin="0,6,12,0" FontSize="12"/>
+            </StackPanel>
+            <Button x:Name="Reveal" Grid.Column="1" Content="Open file ↗" Background="#B7F36B" Foreground="#142014" FontWeight="SemiBold" FontSize="11" VerticalAlignment="Top" Margin="10,0,0,0" IsEnabled="False"/>
+          </Grid>
+          <Border Grid.Row="2" Background="#202F28" CornerRadius="6" Padding="10,8" Margin="0,0,0,12">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+              <TextBlock x:Name="TargetStat" Text="TARGET  —" FontSize="11" Foreground="#C3D4C3"/>
+              <TextBlock x:Name="KindStat" Grid.Column="1" Text="KIND  —" FontSize="11" Foreground="#C3D4C3"/>
+              <TextBlock x:Name="ClearStat" Grid.Column="2" Text="CLEAR  —" FontSize="11" Foreground="#C3D4C3"/>
+            </Grid>
+          </Border>
+          <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><ItemsControl x:Name="RankedRows" ItemTemplate="{StaticResource RankedRow}"/></ScrollViewer>
+          <TextBlock Grid.Row="4" Text="Rank = 65% target probability + 20% (kind probability × local score) + 15% local score" Foreground="#8CA38F" FontSize="11" Margin="0,12,0,0"/>
+        </Grid>
+      </Border>
+    </Grid>
+    <StackPanel Grid.Row="4" Margin="0,16,0,0">
+      <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <TextBlock x:Name="Status" Text="Type to begin." Foreground="#9DAFB9" FontSize="12"/>
+        <TextBlock x:Name="Metrics" Grid.Column="1" Text="ROUND TRIP  —     p50  —     CALLS  0" FontFamily="Consolas" Foreground="#B7F36B" FontSize="12" Margin="20,0,0,0"/>
+      </Grid>
+      <TextBlock Text="COLLECT → ASK → WEIGH → RANK     /     No file opens or runs automatically." Foreground="#617581" FontSize="10" Margin="0,9,0,0"/>
+    </StackPanel>
+  </Grid>
+</Window>
