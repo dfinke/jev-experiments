@@ -1,90 +1,122 @@
 # Jev Lens
 
-A small native Windows / PowerShell demo: describe the file you need and watch Jev's typed micro-decisions change the ranking. Local matches sit beside probability bars and the exact deterministic score. No browser, npm packages, agent framework, or admin rights required.
+> **What if PowerShell could ask AI, “Which file do you mean?” and get a probability back?**
 
-## Run
+Jev Lens is a small Windows desktop demo that turns a folder into a semantic search surface. Describe what you need in plain language, let Jev make typed micro-decisions over a bounded set of local files, and watch deterministic PowerShell ranking turn those decisions into a useful result.
 
-Requires Windows and **PowerShell 7.2+** (`pwsh`). Uses the existing `TYPESAFE_API_KEY` environment variable; the key is never written to disk.
+It is intentionally compact: one PowerShell script, one WPF view, one API request, and a clear local fallback. There is no browser, npm install, agent framework, or administrator permission.
+
+## Try it
+
+Requirements:
+
+- Windows
+- PowerShell 7.2 or newer (`pwsh`)
+- A TypeSafe API key for live Jev decisions
+
+Set `TYPESAFE_API_KEY` in your environment, then run from the project folder:
 
 ```powershell
-cd D:\mygit\jev-lens
+cd path\to\jev-experiments\jev-lens
 pwsh -NoProfile -STA -File .\Start-Lens.ps1
 ```
 
-With no `-Path`, the app scans the current directory (`.`). The command above therefore scans `D:\mygit\jev-lens` itself. Use `-Sample` when you want the repeatable demo folder with 12 tiny files and deliberately different modification times:
-
-```powershell
-pwsh -NoProfile -STA -File .\Start-Lens.ps1 -Sample
-```
-
-Existing sample files are preserved. The app starts with an empty query. Click an example chip or type naturally.
-
-To explore your own folder (top level, up to the first 200 files; at most 12 sent per query):
+With no `-Path`, Jev Lens scans the current directory (`.`). To use another folder:
 
 ```powershell
 pwsh -NoProfile -STA -File .\Start-Lens.ps1 -Path "$HOME\Downloads"
 ```
 
-For local-only mode, add `-Offline`. Missing credentials also use local-only mode. Close and relaunch after changing environment variables. Use **Refresh files** to rescan metadata; there is no background filesystem watcher.
+The scan is top-level and bounded to the first 200 files. The request sends at most 12 candidates to Jev.
 
-## A two-minute demo
+For a repeatable demo, use the included sample folder:
 
-1. **Artwork for the announcement** → `Launch-hero.svg`. Compare the columns: no filename contains those words, so local ranking favors the recent error log; Jev recognizes the likely visual asset.
-2. **The latest proposal** → `Atlas-proposal-approved.md` beats the older draft. Try **A proposal** to remove the recency cue.
-3. **Logs for troubleshooting** → `Checkout-errors.log`; compare the successful deployment log. The independent “clear” judgment can remain tentative even with a strong target choice.
-4. **What did we earn this month?** → `September-revenue.csv`, despite having no literal word overlap with the filename.
-5. Try **A recipe for banana bread** → “No convincing match.”
-
-When pointed at a code folder, a query can match file contents too. For example, typing `debounce` in a folder where only `go.mod` and `go.sum` contain that term brings those two files to the top. The local collector reads bounded text/config files; Jev sees only the fact that a query term matched, never the raw contents.
-
-The rows show the target probability; the smaller equation shows the combined ranking score. **CLEAR** is Jev's independent 0–1 judgment that one candidate stands out, not a calibrated guarantee of correctness. **Open file** launches the selected file with Windows' default associated application. Nothing opens, runs, moves, or deletes automatically. Judgments may vary between runs.
-
-## The architecture worth porting
-
-Adapted from `D:\mygit\nader-dabit-jev\jev-launcher\Sources\JevQuestions.swift`, `Ranker.swift`, `JevClient.swift`, `LauncherModel.swift`, and the uploaded **Pasted markdown.md** notes.
-
-```text
-Get-ChildItem → literal/recency shortlist → Jev (one request)
-             → validate typed answers → weighted rank → optional Explorer reveal
+```powershell
+pwsh -NoProfile -STA -File .\Start-Lens.ps1 -Sample
 ```
 
-Keep five ideas from the Mac app:
+You can also run without a key:
 
-- A small candidate snapshot with stable IDs and useful metadata. Keep real paths local.
-- One fan-out request: `target` **choice**, `kind` **choice**, `clear` **noul**. Consume the full choice distributions.
-- Deterministic composition: `0.65 × P(target) + 0.20 × (P(kind) × local) + 0.15 × local`. The kind signal is gated by local relevance so an unrelated file of the same broad category cannot outrank a direct content match.
-- Asynchronous requests and revision checks so stale results never replace the current query's results.
-- Visible measured latency and honest local fallback when credentials, network, or response validation fail.
+```powershell
+pwsh -NoProfile -STA -File .\Start-Lens.ps1 -Offline
+```
 
-Leave out global hotkeys, launch actions, calculators, clipboard context, persistent preferences, and OS toggles. This is a decision demo over files, not a launcher port.
+Offline mode keeps the local ranking and UI available without sending anything to the API. If the key is missing or a request fails, the app falls back to the same local behavior.
 
-Differences from the original: a 90 ms input pause coalesces bursts, at most two HTTP requests run at once, and a response must match the **exact current revision**, not merely be newer than the previous answer. Each request owns its candidate snapshot. The previous probabilities clear as soon as the query changes. A reusable `HttpClient` keeps connections warm; a 25 ms WPF dispatcher poll keeps network waits off the UI thread. Requests time out after 8 seconds; HTTP 429 adds a 10-second cooldown.
+## The two-minute demo
 
-Local score is 55% filename/category token coverage, 25% bounded local text-match coverage, plus 20% recency (`1 / (1 + ageHours/24)`). For text/config files up to 1 MB, PowerShell checks whether query terms occur in the file. It sends Jev only `content_match_count` and `content_match_terms`; raw contents never leave the machine. Empty/no-key/error states show only this local score, never fabricated AI probabilities. A `none` probability at least as high as the top ranked file suppresses the suggestion action.
+With `-Sample`, try these prompts:
 
-The current typed API is documented by [TypeSafe](https://docs.typesafe.ai/introduction). Runtime validation checks expected answer types, candidate IDs, finite 0–1 probabilities, and distribution totals. No model text is executed.
+- **Artwork for the announcement** → `Launch-hero.svg`
+- **The latest proposal** → `Atlas-proposal-approved.md`
+- **Logs for troubleshooting** → `Checkout-errors.log`
+- **What did we earn this month?** → `September-revenue.csv`
+- **A recipe for banana bread** → no convincing match
 
-## Data and limitations
+Point it at a code folder and type `debounce`. If the term appears inside `go.mod` and `go.sum` but not in their filenames, those files still rise to the top because the local collector searches bounded text and configuration files. Jev receives only the fact that a query term matched, never the raw contents.
 
-Jev receives the query plus up to 12 filenames, file categories, byte sizes, modification ages, and local content-match signals. **No file contents, absolute paths, clipboard data, or credentials appear in the state.** The API key is sent only as the authorization header to `https://api.typesafe.ai/v1/systemone`. Filenames may still be sensitive; use the included sample folder for presentations.
+The result panel shows Jev’s target probability, category judgment, clarity judgment, measured latency, and the exact score used to order the rows. **Open file** launches the selected result with Windows’ default associated application. Nothing opens or runs automatically.
 
-Only the shortlist can win. Large folders are deliberately bounded; this is not a full disk search. File age means modification time, not download time. Filenames suggest purpose but do not prove content or safety. No cost estimate is shown because pricing and token usage can change.
+## How it works
 
-On this machine, a five-query sample probe on 2026-09-21 returned four expected file choices and `none` for the unrelated query. The first call took 469 ms; warm calls took 142–193 ms. These are observations, not a latency promise. The UI reports observed round-trip latency (includes up to about 25 ms polling delay), running p50, and request count; hover for p95 and stale count.
+```text
+collect local metadata and bounded text signals
+        ↓
+build a small candidate snapshot with stable IDs
+        ↓
+ask Jev: target choice + kind choice + clear noul
+        ↓
+validate typed answers and probability distributions
+        ↓
+combine Jev with deterministic local relevance
+        ↓
+rank results and wait for the user’s explicit action
+```
 
-## Files and checks
+The ranking formula is:
 
-- `Start-Lens.ps1` — WPF events, bounded asynchronous request loop, safe reveal action.
-- `Lens.Core.ps1` — sample data, collection, shortlist, typed request, validation, ranking.
-- `Lens.xaml` — native window layout and styling.
-- `Test-Lens.ps1` — local contract/edge checks; optional live smoke checks.
+```text
+0.65 × target probability
++ 0.20 × (kind probability × local relevance)
++ 0.15 × local relevance
+```
+
+The category signal is gated by local relevance. An unrelated PowerShell module does not outrank a Go module that actually contains the requested term just because both are “code.”
+
+The local score combines filename/category token coverage, bounded text-match coverage, and recency. Text and configuration files up to 1 MB are eligible for local term matching. Real paths stay local; the API state contains filenames, categories, sizes, modification ages, and content-match signals only.
+
+Every query revision owns its candidate snapshot. Responses for older revisions are discarded, so a slow network response cannot reorder a newer query. The app coalesces fast typing, keeps at most two requests in flight, reuses its HTTP connection, and reports observed round-trip latency.
+
+Jev’s typed questions follow the [TypeSafe System One model](https://docs.typesafe.ai/introduction): choices return a selected option, a probability distribution, and confidence; `noul` returns a 0–1 truth probability. Multiple questions can be evaluated in one request.
+
+## Privacy and boundaries
+
+- Raw file contents never leave the machine.
+- Absolute paths, clipboard contents, and credentials are never included in the Jev state.
+- The API key is read from `TYPESAFE_API_KEY` and sent only as an authorization header.
+- Only a bounded top-level candidate set is considered.
+- File names can still be sensitive; use the sample folder for screenshots or presentations.
+- Jev suggestions are decisions for code to consume, not proof that a file is safe or correct.
+
+## Project files
+
+- `Start-Lens.ps1` — WPF window, input events, asynchronous requests, and the explicit open-file action.
+- `Lens.Core.ps1` — file collection, local content matching, request construction, validation, and ranking.
+- `Lens.xaml` — the native Windows layout and styling.
+- `Test-Lens.ps1` — local contract tests and optional live smoke checks.
+
+## Checks
+
+Run the local checks without making API calls:
 
 ```powershell
 .\Test-Lens.ps1
-.\Test-Lens.ps1 -Live  # five real API calls
-
-# Render the real window after a response, report UI state, then exit.
-New-Item -ItemType Directory -Force work | Out-Null
-pwsh -NoProfile -STA -File .\Start-Lens.ps1 -InitialQuery "The latest proposal" -VerifyUiTo "$PWD\work\live.png"
-pwsh -NoProfile -STA -File .\Start-Lens.ps1 -Offline -VerifyUiTo "$PWD\work\offline.png"
 ```
+
+Run the five-query live smoke check:
+
+```powershell
+.\Test-Lens.ps1 -Live
+```
+
+The test suite covers bounded candidate snapshots, content matching, privacy-safe request state, typed-answer validation, stale-response protection, and ranking behavior when similarly categorized files compete.
