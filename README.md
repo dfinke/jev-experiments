@@ -6,6 +6,10 @@ Jev Lens is a small Windows desktop demo that turns a folder into a semantic sea
 
 It is intentionally compact: one PowerShell script, one WPF view, one API request, and a clear local fallback. There is no browser, npm install, agent framework, or administrator permission.
 
+<a href="https://youtu.be/rLLO-umS140"><img src="https://img.youtube.com/vi/rLLO-umS140/hqdefault.jpg" alt="Watch the Jev Lens demo on YouTube" width="480"></a>
+
+[Watch the Jev Lens demo on YouTube](https://youtu.be/rLLO-umS140)
+
 ## Try it
 
 Requirements:
